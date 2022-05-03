@@ -1,6 +1,6 @@
 # UM Admin User Profile Update Email
 
-An email template for sending an email to the site admin when a User Profile is updated 
+An email template for sending an email to the site admin when an UM User Profile is updated 
 
 either by the User or a Site Admin both from WP User -> Edit and the UM Profile Form.
 
