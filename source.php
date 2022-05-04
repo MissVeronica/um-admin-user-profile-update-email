@@ -1,6 +1,6 @@
 <?php
 
-//  Version 1.0 2022-05-03
+//  Version 1.1 2022-05-04
 //  Source: https://github.com/MissVeronica/UM-Admin-User-Profile-Update-Email
 
 add_filter( 'um_email_notifications', 'custom_email_notifications_profile_is_updated', 10, 1 );
@@ -38,21 +38,6 @@ function custom_profile_is_updated_email( $to_update, $user_id, $args = array() 
     $time_format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
     um_fetch_user( $user_id );
     
-    if( empty( $args )) {
-        
-        $args['tags'] = array(  '{site_name}', 
-                                '{username}', 
-                                '{email}',
-                                '{display_name}',
-                                '{submitted_registration}' );
-
-        $args['tags_replace'] = array(  UM()->options()->get( 'site_name' ), 
-                                        um_user( 'user_login' ), 
-                                        um_user( 'user_email' ),
-                                        um_user( 'display_name' ),
-                                        um_user_submitted_registration_formatted() );
-    }
-
     $args['tags'] = array(  '{profile_url}', 
                             '{current_date}', 
                             '{updating_user}' );
