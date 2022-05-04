@@ -1,6 +1,6 @@
 <?php
 
-//  Version 1.1 2022-05-04
+//  Version 1.2 2022-05-04
 //  Source: https://github.com/MissVeronica/UM-Admin-User-Profile-Update-Email
 
 add_filter( 'um_email_notifications', 'custom_email_notifications_profile_is_updated', 10, 1 );
@@ -28,7 +28,9 @@ function custom_email_notifications_profile_is_updated( $emails ) {
 
 function custom_profile_is_updated_email_backend( $user_id, $old_data ) {
 
-    custom_profile_is_updated_email( $old_data, $user_id );
+    if( isset( $_REQUEST['action']) && $_REQUEST['action'] == 'update' ) {
+        custom_profile_is_updated_email( $old_data, $user_id );
+    }
 }
 
 function custom_profile_is_updated_email( $to_update, $user_id, $args = array() ) {
@@ -45,7 +47,9 @@ function custom_profile_is_updated_email( $to_update, $user_id, $args = array() 
     $args['tags_replace'] = array(  um_user_profile_url( $user_id ), 
                                     date_i18n( $time_format, current_time( 'timestamp' )), 
                                     $current_user->user_login );
-    
+
     UM()->mail()->send( get_bloginfo( 'admin_email' ), 'profile_is_updated_email', $args );
 }
+
+
 
