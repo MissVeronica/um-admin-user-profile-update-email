@@ -2,7 +2,7 @@
 
 An email template for sending an email to the site admin when an UM User Profile is updated either by the User or a Site Admin both from WP User -> Edit and the UM Profile Form.
 
-Enter the UM Profile Form IDs when emails should be sent in UM Settings -> Email -> Profile is updated email, where you also can customize the email template.
+Enter the UM Profile Form IDs comma separated when emails should be sent in: UM Settings -> Email -> Profile is updated email -> Include these UM Profile Forms for sending emails, where you also can customize the email template.
 
 ## Installation
 Install by adding the file source.php to your child-theme’s functions.php file
