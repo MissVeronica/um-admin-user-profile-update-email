@@ -1,11 +1,12 @@
 <?php
 
-//  Version 1.2 2022-05-04
+//  Version 1.3 2022-08-09
 //  Source: https://github.com/MissVeronica/UM-Admin-User-Profile-Update-Email
 
 add_filter( 'um_email_notifications', 'custom_email_notifications_profile_is_updated', 10, 1 );
 add_action( 'um_user_after_updating_profile', 'custom_profile_is_updated_email', 10, 3 );
 add_action( 'profile_update', 'custom_profile_is_updated_email_backend', 10, 2 );
+add_filter( 'um_admin_settings_email_section_fields', 'um_admin_settings_email_section_fields_custom_forms', 10, 2 );
 
 function custom_email_notifications_profile_is_updated( $emails ) {
 
@@ -26,6 +27,20 @@ function custom_email_notifications_profile_is_updated( $emails ) {
     return array_merge( $custom_emails, $emails );
 }
 
+function um_admin_settings_email_section_fields_custom_forms( $section_fields, $email_key ) {
+
+    if( $email_key == 'profile_is_updated_email' ) {
+        $section_fields[] = array(
+                'id'            => $email_key . '_custom_forms',
+                'type'          => 'text',
+                'label'         => __( 'Include these UM Profile Forms for sending emails:', 'ultimate-member' ),
+                'conditional'   => array( $email_key . '_on', '=', 1 ),
+                'tooltip'       => __( 'Comma separated UM Profile Form IDs, empty send emails always.', 'ultimate-member' )
+                );
+    }
+    return $section_fields;
+}
+
 function custom_profile_is_updated_email_backend( $user_id, $old_data ) {
 
     if( isset( $_REQUEST['action']) && $_REQUEST['action'] == 'update' ) {
@@ -36,6 +51,13 @@ function custom_profile_is_updated_email_backend( $user_id, $old_data ) {
 function custom_profile_is_updated_email( $to_update, $user_id, $args = array() ) {
 
     global $current_user;
+
+    $forms = UM()->options()->get( 'profile_is_updated_email_custom_forms' );
+
+    if( !empty( $forms )) {
+        $forms = explode( ',', $forms ); 
+        if( is_array( $forms ) && !in_array( $args['form_id'], $forms )) return;
+    }
 
     $time_format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
     um_fetch_user( $user_id );
