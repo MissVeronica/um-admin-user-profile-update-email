@@ -5,7 +5,7 @@
 
 add_filter( 'um_email_notifications', 'custom_email_notifications_profile_is_updated', 10, 1 );
 add_action( 'um_user_after_updating_profile', 'custom_profile_is_updated_email', 10, 3 );
-add_action( 'profile_update', 'custom_profile_is_updated_email_backend', 10, 2 );
+add_action( 'profile_update', 'custom_profile_is_updated_email_backend', 10, 3 );
 add_filter( 'um_admin_settings_email_section_fields', 'um_admin_settings_email_section_fields_custom_forms', 10, 2 );
 
 function custom_email_notifications_profile_is_updated( $emails ) {
@@ -41,10 +41,10 @@ function um_admin_settings_email_section_fields_custom_forms( $section_fields, $
     return $section_fields;
 }
 
-function custom_profile_is_updated_email_backend( $user_id, $old_data ) {
+function custom_profile_is_updated_email_backend( $user_id, $old_data, $new_update ) {
 
     if( isset( $_REQUEST['action']) && $_REQUEST['action'] == 'update' ) {
-        custom_profile_is_updated_email( $old_data, $user_id );
+        custom_profile_is_updated_email( $new_update, $user_id );
     }
 }
 
