@@ -1,6 +1,7 @@
 <?php
 
-//  Version 1.3 2022-08-09
+//  Version 2.0 2022-09-20
+//  An email template for sending an email to the site admin when an UM User Profile is updated
 //  Source: https://github.com/MissVeronica/UM-Admin-User-Profile-Update-Email
 
 add_filter( 'um_email_notifications', 'custom_email_notifications_profile_is_updated', 10, 1 );
@@ -41,10 +42,10 @@ function um_admin_settings_email_section_fields_custom_forms( $section_fields, $
     return $section_fields;
 }
 
-function custom_profile_is_updated_email_backend( $user_id, $old_data, $new_update ) {
+function custom_profile_is_updated_email_backend( $user_id, $old_data, $user_data ) {
 
     if( isset( $_REQUEST['action']) && $_REQUEST['action'] == 'update' ) {
-        custom_profile_is_updated_email( $new_update, $user_id );
+        custom_profile_is_updated_email( $user_data, $user_id );
     }
 }
 
@@ -59,11 +60,25 @@ function custom_profile_is_updated_email( $to_update, $user_id, $args = array() 
         if( is_array( $forms ) && !in_array( $args['form_id'], $forms )) return;
     }
 
+    $submitted = um_user( 'submitted' );    
+    foreach( $to_update as $key => $value ) {
+        $submitted[$key] = $value;
+    }
+
+    $registration_form_id = $submitted['form_id'];
+    $registration_timestamp = um_user( 'timestamp' );
+    $submitted['form_id'] = $args['form_id'];
+    
+    update_user_meta( $user_id, 'submitted', $submitted );
+    update_user_meta( $user_id, 'timestamp', current_time( 'timestamp' ) );
+    UM()->user()->remove_cache( $user_id );
+    um_fetch_user( $user_id );
+
     $time_format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
     um_fetch_user( $user_id );
     
-    $args['tags'] = array(  '{profile_url}', 
-                            '{current_date}', 
+    $args['tags'] = array(  '{profile_url}',
+                            '{current_date}',
                             '{updating_user}' );
 
     $args['tags_replace'] = array(  um_user_profile_url( $user_id ), 
@@ -71,7 +86,11 @@ function custom_profile_is_updated_email( $to_update, $user_id, $args = array() 
                                     $current_user->user_login );
 
     UM()->mail()->send( get_bloginfo( 'admin_email' ), 'profile_is_updated_email', $args );
+
+    $submitted['form_id'] = $registration_form_id;
+
+    update_user_meta( $user_id, 'submitted', $submitted );
+    update_user_meta( $user_id, 'timestamp', $registration_timestamp );
+    UM()->user()->remove_cache( $user_id );
+    um_fetch_user( $user_id );
 }
-
-
-
