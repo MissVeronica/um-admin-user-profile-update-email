@@ -4,7 +4,7 @@ An email template for sending an email to the site admin when an UM User Profile
 
 Enter the UM Profile Form IDs comma separated when emails should be sent in: UM Settings -> Email -> Profile is updated email -> Include these UM Profile Forms for sending emails, where you also can customize the email template.
 
-Version 2: Supports multiple Profile forms.
+Version 2: Supports multiple Profile forms with other fields than in the Registration form.
 
 ## Installation
 Install by adding the file source.php to your child-theme’s functions.php file
