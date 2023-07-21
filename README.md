@@ -8,5 +8,5 @@ An email template for sending an email to the site admin when an UM User Profile
 
 ## Installation
 1. Install by downloading the plugin ZIP file and install as a new Plugin, which you upload in WordPress -> Plugins -> Add New -> Upload Plugin.
-2. Activate the Plugin: Ultimate Member - Additional Email Recipients
+2. Activate the Plugin: Ultimate Member - Admin Email Profile Update
 3. Upload the email template file profile_is_updated_email.php to your theme or child-theme directory: .../ultimate-member/email/profile_is_updated_email.php
