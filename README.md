@@ -1,7 +1,7 @@
 # UM Admin User Profile Update Email
 An email template for sending an email to the site admin when an UM User Profile is updated either by the User or a Site Admin both from WP User -> Edit and the UM Profile Form.
 
-Profile fields updated via the UM Account page are not supported and will not send an Admin email.
+Profile fields updated via the UM Account page's existing or optional tabs are not supported and will not send an Admin email.
 
 ## UM Settings
 1. UM Settings -> Email -> Profile is updated email -> Include these UM Profile Forms for sending emails - Comma separated UM Profile Form IDs, empty send emails always.
