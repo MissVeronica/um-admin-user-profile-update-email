@@ -27,7 +27,7 @@ Class UM_Admin_Email_Profile_Update {
         add_action( 'um_user_after_updating_profile',         array( $this, 'custom_profile_is_updated_email' ), 10, 3 );
         add_action( 'profile_update',                         array( $this, 'custom_profile_is_updated_email_backend' ), 10, 3 );
         add_filter( 'um_admin_settings_email_section_fields', array( $this, 'um_admin_settings_email_section_fields_custom_forms' ), 10, 2 );
-        add_action(	'um_extend_admin_menu',                   array( $this, 'copy_email_notifications_admin_profile_update' ), 10 );
+        add_action( 'um_extend_admin_menu',                   array( $this, 'copy_email_notifications_admin_profile_update' ), 10 );
 
         define( 'Admin_Email_Profile_Update_Path', plugin_dir_path( __FILE__ ) );
     }
@@ -84,12 +84,12 @@ Class UM_Admin_Email_Profile_Update {
 
             $located = UM()->mail()->locate_template( $slug );
 
-            if ( ! is_file( $located )) {
+            if ( ! is_file( $located ) || filesize( $located ) == 0 ) {
                 $located = wp_normalize_path( get_stylesheet_directory() . '/ultimate-member/email/' . $slug . '.php' );
             }
 
             clearstatcache();
-            if ( ! file_exists( $located ) || filesize( $located ) == 0 ) {
+            if ( ! file_exists( $located ) ) {
 
                 wp_mkdir_p( dirname( $located ) );
 
