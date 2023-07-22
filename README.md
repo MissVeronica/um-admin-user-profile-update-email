@@ -11,4 +11,4 @@ Profile fields updated via the UM Account page's existing or optional tabs are n
 ## Installation
 1. Install by downloading the plugin ZIP file and install as a new Plugin, which you upload in WordPress -> Plugins -> Add New -> Upload Plugin.
 2. Activate the Plugin: Ultimate Member - Admin Email Profile Update
-3. Copy the email template file from plugins/um-admin-user-profile-update-email-main/profile_is_updated_email.php to your theme or child-theme directory: .../ultimate-member/email/profile_is_updated_email.php
+3. Copy the plugin email template file from plugins/um-admin-user-profile-update-email-main/profile_is_updated_email.php to your active theme's or child-theme's directory: .../ultimate-member/email/profile_is_updated_email.php
