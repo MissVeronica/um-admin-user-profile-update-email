@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Admin Email Profile Update
  * Description:     Extension to Ultimate Member with an email template for sending an email to the site admin when an UM User Profile is updated.
- * Version:         3.2.0
+ * Version:         3.3.0
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v2 or later
@@ -106,7 +106,7 @@ Class UM_Admin_Email_Profile_Update {
     public function custom_profile_is_updated_email_backend( $user_id, $old_data, $user_data ) {
 
         if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'update' ) {
-            custom_profile_is_updated_email( $user_data, $user_id );
+            $this->custom_profile_is_updated_email( $user_data, $user_id );
         }
     }
 
