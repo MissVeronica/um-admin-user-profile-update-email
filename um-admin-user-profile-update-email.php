@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Admin Email Profile Update
  * Description:     Extension to Ultimate Member with an email template for sending an email to the site admin when an UM User Profile is updated.
- * Version:         3.3.0
+ * Version:         3.4.0
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v2 or later
@@ -27,7 +27,6 @@ Class UM_Admin_Email_Profile_Update {
         add_action( 'um_user_after_updating_profile',         array( $this, 'custom_profile_is_updated_email' ), 10, 3 );
         add_action( 'profile_update',                         array( $this, 'custom_profile_is_updated_email_backend' ), 10, 3 );
         add_filter( 'um_admin_settings_email_section_fields', array( $this, 'um_admin_settings_email_section_fields_custom_forms' ), 10, 2 );
-        add_action( 'um_extend_admin_menu',                   array( $this, 'copy_email_notifications_admin_profile_update' ), 10 );
 
         define( 'Admin_Email_Profile_Update_Path', plugin_dir_path( __FILE__ ) );
     }
@@ -45,7 +44,7 @@ Class UM_Admin_Email_Profile_Update {
                             'default_active' => true ));
 
         UM()->options()->options = array_merge( array(  'profile_is_updated_email_on'  => 1,
-                                                        'profile_is_updated_email_sub' => 'Profile Update {username}', ), 
+                                                        'profile_is_updated_email_sub' => 'Profile Update {username}', ),
                                                 UM()->options()->options );
 
         foreach ( $custom_emails as $slug => $custom_email ) {
@@ -59,6 +58,8 @@ Class UM_Admin_Email_Profile_Update {
             $this->slug[] = $slug;
         }
 
+        $this->copy_email_notifications_admin_profile_update();
+
         return array_merge( $custom_emails, $emails );
     }
 
@@ -69,7 +70,7 @@ Class UM_Admin_Email_Profile_Update {
             $section_fields[] = array(
                     'id'            => $email_key . '_custom_forms',
                     'type'          => 'text',
-                    'label'         => __( 'Include these UM Profile Forms for sending emails:', 'ultimate-member' ),
+                    'label'         => __( 'Admin Email Profile Update - Include these UM Profile Forms', 'ultimate-member' ),
                     'conditional'   => array( $email_key . '_on', '=', 1 ),
                     'tooltip'       => __( 'Comma separated UM Profile Form IDs, empty send emails always.', 'ultimate-member' )
                     );
@@ -121,7 +122,7 @@ Class UM_Admin_Email_Profile_Update {
             if ( is_array( $forms ) && ! in_array( $args['form_id'], $forms )) return;
         }
 
-        $submitted = um_user( 'submitted' );    
+        $submitted = um_user( 'submitted' );
         foreach( $to_update as $key => $value ) {
             $submitted[$key] = $value;
         }
@@ -144,7 +145,7 @@ Class UM_Admin_Email_Profile_Update {
                                 '{updating_user}' );
 
         $args['tags_replace'] = array(  um_user_profile_url( $user_id ), 
-                                        date_i18n( $time_format, current_time( 'timestamp' )), 
+                                        date_i18n( $time_format, current_time( 'timestamp' )),
                                         $current_user->user_login );
 
         UM()->mail()->send( get_bloginfo( 'admin_email' ), 'profile_is_updated_email', $args );
