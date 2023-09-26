@@ -13,6 +13,7 @@ Profile fields updated via the UM Account page's existing or optional tabs are n
 2. Version 3.1.0 Update which auto installs the email template
 3. Version 3.2.0 Improved installation of the email template
 4. Version 3.3.0 Bug fix update from Backend
+5. Version 3.4.0 Update of editing the template file
 
 ## Installation
 1. Install by downloading the plugin ZIP file and install as a new Plugin, which you upload in WordPress -> Plugins -> Add New -> Upload Plugin.
