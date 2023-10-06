@@ -14,6 +14,7 @@ Profile fields updated via the UM Account page's existing or optional tabs are n
 3. Version 3.2.0 Improved installation of the email template
 4. Version 3.3.0 Bug fix update from Backend
 5. Version 3.4.0 Update of editing the template file
+6. Version 3.5.0 Update of PHP 8 issue with STYLESHEETPATH
 
 ## Installation
 1. Install by downloading the plugin ZIP file and install as a new Plugin, which you upload in WordPress -> Plugins -> Add New -> Upload Plugin.
