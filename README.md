@@ -3,10 +3,11 @@ An email template for sending an email to the site admin when an UM User Profile
 
 Profile fields updated via the UM Account page's existing or optional tabs are not supported by this plugin and will not send an Admin email.
 
-## UM Settings
-1. UM Settings -> Email -> Profile is updated email -> Include these UM Profile Forms for sending emails - Comma separated UM Profile Form IDs, empty send emails always.
-2. Customize the email template "Profile is updated email" if required.
-3. Email placeholders: {profile_url}, {current_date}, {updating_user}
+## UM Settings -> Email
+1. Profile is updated email -> Include these UM Profile Forms for sending emails - Comma separated UM Profile Form IDs, empty send emails always.
+2. Admin Email Profile Update - Backend UM Profile "Form" - Select UM Profile "Form" for mapping of backend submitted WP fields.
+3. Customize the email template "Profile is updated email" if required.
+4. Email placeholders: {profile_url}, {current_date}, {updating_user}
 
 ## Updates
 1. Version 3.0.0 Replaced the code snippet version 2 with a plugin
@@ -15,6 +16,7 @@ Profile fields updated via the UM Account page's existing or optional tabs are n
 4. Version 3.3.0 Bug fix update from Backend
 5. Version 3.4.0 Update of editing the template file
 6. Version 3.5.0 Update of PHP 8 issue with STYLESHEETPATH
+7. Version 4.0.0 Redesign of Backend WP profile updates. You can build an UM Form being used for mapping of backend submitted WP fields. 
 
 ## Installation
 1. Install by downloading the plugin ZIP file and install as a new Plugin, which you upload in WordPress -> Plugins -> Add New -> Upload Plugin.
