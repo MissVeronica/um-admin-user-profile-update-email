@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Admin Email Profile Update
  * Description:     Extension to Ultimate Member with an email template for sending an email to the site admin when an UM User Profile is updated.
- * Version:         3.5.0
+ * Version:         4.0.0
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v2 or later
@@ -19,13 +19,15 @@ if ( ! class_exists( 'UM' ) ) return;
 
 Class UM_Admin_Email_Profile_Update {
 
-    public $slug = array();
+    public $slug            = array();
+    public $ready           = false;
+    public $backend_form_id = '';
 
     function __construct() {
 
-        add_filter( 'um_email_notifications',                 array( $this, 'custom_email_notifications_profile_is_updated' ), 10, 1 );
-        add_action( 'um_user_after_updating_profile',         array( $this, 'custom_profile_is_updated_email' ), 10, 3 );
-        add_action( 'profile_update',                         array( $this, 'custom_profile_is_updated_email_backend' ), 10, 3 );
+        add_filter( 'um_email_notifications',                 array( $this, 'custom_email_notifications_profile_is_updated' ), 100, 1 );
+        add_action( 'um_user_after_updating_profile',         array( $this, 'custom_profile_is_updated_email' ), 999, 3 );
+        add_action( 'profile_update',                         array( $this, 'custom_profile_is_updated_email_backend' ), 999, 3 );
         add_filter( 'um_admin_settings_email_section_fields', array( $this, 'um_admin_settings_email_section_fields_custom_forms' ), 10, 2 );
 
         define( 'Admin_Email_Profile_Update_Path', plugin_dir_path( __FILE__ ) );
@@ -74,6 +76,15 @@ Class UM_Admin_Email_Profile_Update {
                     'conditional'   => array( $email_key . '_on', '=', 1 ),
                     'tooltip'       => __( 'Comma separated UM Profile Form IDs, empty send emails always.', 'ultimate-member' )
                     );
+
+            $section_fields[] = array(
+                    'id'            => $email_key . '_backend_form',
+                    'type'          => 'select',
+                    'label'         => __( 'Admin Email Profile Update - Backend UM Profile "Form"', 'ultimate-member' ),
+                    'options'       => $this->get_form_ids_profile(),
+                    'conditional'   => array( $email_key . '_on', '=', 1 ),
+                    'tooltip'       => __( 'Select Profile "Form" for backend UM Form simulation.', 'ultimate-member' )
+                    );
         }
 
         return $section_fields;
@@ -109,7 +120,14 @@ Class UM_Admin_Email_Profile_Update {
     public function custom_profile_is_updated_email_backend( $user_id, $old_data, $user_data ) {
 
         if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'update' ) {
-            $this->custom_profile_is_updated_email( $user_data, $user_id );
+
+            if ( is_admin() && ! $this->ready ) {
+
+                $this->ready = true;
+                $this->backend_form_id = sanitize_text_field( UM()->options()->get( 'profile_is_updated_email_backend_form' ));
+
+                $this->custom_profile_is_updated_email( $user_data, $user_id );
+            }
         }
     }
 
@@ -117,9 +135,13 @@ Class UM_Admin_Email_Profile_Update {
 
         global $current_user;
 
+        if ( empty( $user_id ) ) {
+            return;
+        }
+
         $forms = UM()->options()->get( 'profile_is_updated_email_custom_forms' );
 
-        if ( ! empty( $forms )) {
+        if ( ! empty( $forms ) && isset( $args['form_id'] )) {
             $forms = array_map( 'trim', array_map( 'sanitize_text_field', explode( ',', $forms ))); 
             if ( is_array( $forms ) && ! in_array( $args['form_id'], $forms )) return;
         }
@@ -132,7 +154,7 @@ Class UM_Admin_Email_Profile_Update {
         $registration_form_id = $submitted['form_id'];
         $registration_timestamp = um_user( 'timestamp' );
 
-        $submitted['form_id'] = $args['form_id'];
+        $submitted['form_id'] = ( isset( $args['form_id'] )) ? $args['form_id'] : $this->backend_form_id;
 
         update_user_meta( $user_id, 'submitted', $submitted );
         update_user_meta( $user_id, 'timestamp', current_time( 'timestamp' ) );
@@ -144,11 +166,14 @@ Class UM_Admin_Email_Profile_Update {
 
         $args['tags'] = array(  '{profile_url}',
                                 '{current_date}',
-                                '{updating_user}' );
+                                '{updating_user}',
+                             );
 
         $args['tags_replace'] = array(  um_user_profile_url( $user_id ), 
                                         date_i18n( $time_format, current_time( 'timestamp' )),
-                                        $current_user->user_login );
+                                        $current_user->user_login,
+                                    );
+
 
         UM()->mail()->send( get_bloginfo( 'admin_email' ), 'profile_is_updated_email', $args );
 
@@ -159,6 +184,24 @@ Class UM_Admin_Email_Profile_Update {
 
         UM()->user()->remove_cache( $user_id );
         um_fetch_user( $user_id );
+    }
+
+    public function get_form_ids_profile() {
+
+        $um_form_ids = array( '' );
+        $um_forms = get_posts( array( 'post_type' => 'um_form', 'numberposts' => -1, 'post_status' => array( 'publish' )));
+
+        if ( ! empty( $um_forms )) {
+            foreach ( $um_forms as $um_form ) {
+
+                $um_form_meta = get_post_meta( $um_form->ID );
+                if ( isset( $um_form_meta['_um_mode'][0] ) && $um_form_meta['_um_mode'][0] == 'profile' ) {
+
+                    $um_form_ids[$um_form->ID] = $um_form->post_title;
+                }
+            }
+        }
+        return $um_form_ids;
     }
 }
 
