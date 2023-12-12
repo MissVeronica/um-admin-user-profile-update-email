@@ -18,6 +18,7 @@ Profile fields updated via the UM Account page's existing or optional tabs are n
 6. Version 3.5.0 Update of PHP 8 issue with STYLESHEETPATH
 7. Version 4.0.0 Redesign of Backend WP profile updates. You can build an UM Form being used only for mapping of backend submitted WP fields for the email template.
 8. Version 4.1.0 Multiple selections of "Include these UM Profile Forms" instead of comma separated. Disable backend emails with no "Form" selected.
+9. Version 4.2.0 Fix for empty form ID.
 
 ## Installation
 1. Install by downloading the plugin ZIP file and install as a new Plugin, which you upload in WordPress -> Plugins -> Add New -> Upload Plugin.
