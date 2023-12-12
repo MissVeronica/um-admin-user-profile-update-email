@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Admin Email Profile Update
  * Description:     Extension to Ultimate Member with an email template for sending an email to the site admin when an UM User Profile is updated either by the User or an Admin.
- * Version:         4.3.0
+ * Version:         4.4.0
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v2 or later
@@ -86,6 +86,14 @@ Class UM_Admin_Email_Profile_Update {
                     'conditional'   => array( $email_key . '_on', '=', 1 ),
                     'tooltip'       => __( 'Select Profile "Form" for mapping of backend submitted WP fields. No selection disable backend emails.', 'ultimate-member' )
                     );
+
+            $section_fields[] = array(
+                    'id'            => $email_key . '_debug_log',
+                    'type'          => 'checkbox',
+                    'label'         => __( 'Admin Email Profile Update - Trace to debug.log', 'ultimate-member' ),
+                    'conditional'   => array( $email_key . '_on', '=', 1 ),
+                    'tooltip'       => __( 'Click for trace of Form IDs to debug.log.', 'ultimate-member' )
+                    );
         }
 
         return $section_fields;
@@ -138,62 +146,90 @@ Class UM_Admin_Email_Profile_Update {
 
         global $current_user;
 
-        if ( empty( $user_id ) ) {
-            return;
+        if ( ! empty( $user_id )) {
+
+            $forms = false;
+            if ( isset( $args['form_id'] ) && ! empty( $args['form_id'] )) {
+
+                $forms = UM()->options()->get( 'profile_is_updated_email_custom_forms' );
+
+                if ( ! empty( $forms ) && is_array( $forms )) {
+                    $forms = array_map( 'sanitize_text_field', $forms );
+                }
+            }
+
+            if ( empty( $forms ) || ( is_array( $forms ) && in_array( $args['form_id'], $forms ))) {
+
+                um_fetch_user( $user_id );
+                $submitted = um_user( 'submitted' );
+
+                if ( empty( $submitted )) {
+                    $submitted = array();
+                    $submitted['form_id'] = '';
+                }
+
+                foreach( $to_update as $key => $value ) {
+                    $submitted[$key] = $value;
+                }
+
+                $registration_form_id = $submitted['form_id'];
+                $registration_timestamp = um_user( 'timestamp' );
+
+                $submitted['form_id'] = ( empty( $this->backend_form_id )) ? $args['form_id'] : $this->backend_form_id;
+                $submitted['form_id'] = ( empty( $submitted['form_id'] ))  ? $registration_form_id : $submitted['form_id'];
+
+                if ( ! empty( $submitted['form_id'] )) {
+
+                    update_user_meta( $user_id, 'submitted', $submitted );
+                    update_user_meta( $user_id, 'timestamp', current_time( 'timestamp' ) );
+
+                    UM()->user()->remove_cache( $user_id );
+                    um_fetch_user( $user_id );
+
+                    $time_format = get_option( 'date_format', 'F j, Y' ) . ' ' . get_option( 'time_format', 'g:i a' );
+
+                    $args['tags'] = array(  '{profile_url}',
+                                            '{current_date}',
+                                            '{updating_user}',
+                                        );
+
+                    $args['tags_replace'] = array(  um_user_profile_url( $user_id ), 
+                                                    date_i18n( $time_format, current_time( 'timestamp' )),
+                                                    $current_user->user_login,
+                                                );
+
+                    UM()->mail()->send( get_bloginfo( 'admin_email' ), 'profile_is_updated_email', $args );
+
+                    if ( ! empty( $registration_form_id )) {
+                        $submitted['form_id'] = $registration_form_id;
+                    }
+
+                    update_user_meta( $user_id, 'submitted', $submitted );
+                    update_user_meta( $user_id, 'timestamp', $registration_timestamp );
+
+                    UM()->user()->remove_cache( $user_id );
+                    um_fetch_user( $user_id );
+
+                } else {
+
+                    if ( UM()->options()->get( 'profile_is_updated_email_debug_log' ) == 1 ) {
+                        $trace = date_i18n( 'Y-m-d H:i:s ', current_time( 'timestamp' )) . 'Admin Email Profile Update error trace for user_id ' . $user_id;
+                        $trace .= ' current_user->ID: ' . $current_user->ID;
+                        $trace .= ' Forms args: ' . $args['form_id'];
+                        $trace .= ' backend: ' . $this->backend_form_id;
+                        $trace .= ' registration: ' . $registration_form_id;
+                        $trace .= ' submitted: ' . $submitted['form_id'];
+                        if ( is_array( $forms )) {
+                            $trace .= ' custom: ' . implode( ', ', $forms );
+                        } else {
+                            $trace .= ' custom: none';
+                        }
+
+                        file_put_contents( WP_CONTENT_DIR . '/debug.log', $trace . chr(13), FILE_APPEND  );
+                    }
+                }
+            }
         }
-
-        if ( isset( $args['form_id'] )) {
-            $forms = array_map( 'sanitize_text_field', UM()->options()->get( 'profile_is_updated_email_custom_forms' ));
-            if ( ! empty( $forms ) && is_array( $forms ) && ! in_array( $args['form_id'], $forms )) return;
-            $saved_form_id = $args['form_id'];
-        }
-
-        $submitted = um_user( 'submitted' );
-        if ( empty( $submitted )) {
-            $submitted = array();
-            $submitted['form_id'] = '';
-        }
-        foreach( $to_update as $key => $value ) {
-            $submitted[$key] = $value;
-        }
-
-        $registration_form_id = $submitted['form_id'];
-        $registration_timestamp = um_user( 'timestamp' );
-
-        $submitted['form_id'] = ( isset( $args['form_id'] )) ? $args['form_id'] : $this->backend_form_id;
-        if ( empty( $submitted['form_id'] )) {
-            $submitted['form_id'] = $saved_form_id;
-        }
-
-        update_user_meta( $user_id, 'submitted', $submitted );
-        update_user_meta( $user_id, 'timestamp', current_time( 'timestamp' ) );
-
-        UM()->user()->remove_cache( $user_id );
-        um_fetch_user( $user_id );
-
-        $time_format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
-
-        $args['tags'] = array(  '{profile_url}',
-                                '{current_date}',
-                                '{updating_user}',
-                             );
-
-        $args['tags_replace'] = array(  um_user_profile_url( $user_id ), 
-                                        date_i18n( $time_format, current_time( 'timestamp' )),
-                                        $current_user->user_login,
-                                    );
-
-        UM()->mail()->send( get_bloginfo( 'admin_email' ), 'profile_is_updated_email', $args );
-
-        if ( ! empty( $registration_form_id )) {
-            $submitted['form_id'] = $registration_form_id;
-        }
-
-        update_user_meta( $user_id, 'submitted', $submitted );
-        update_user_meta( $user_id, 'timestamp', $registration_timestamp );
-
-        UM()->user()->remove_cache( $user_id );
-        um_fetch_user( $user_id );
     }
 
     public function get_form_ids_profile() {
