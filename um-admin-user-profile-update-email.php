@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Admin Email Profile Update
  * Description:     Extension to Ultimate Member with an email template for sending an email to the site admin when an UM User Profile is updated either by the User or an Admin.
- * Version:         4.1.0
+ * Version:         4.2.0
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v2 or later
@@ -10,7 +10,7 @@
  * Author URI:      https://github.com/MissVeronica
  * Text Domain:     ultimate-member
  * Domain Path:     /languages
- * UM version:      2.6.8
+ * UM version:      2.7.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; 
@@ -20,7 +20,6 @@ if ( ! class_exists( 'UM' ) ) return;
 Class UM_Admin_Email_Profile_Update {
 
     public $slug            = array();
-    public $ready           = false;
     public $backend_form_id = '';
 
     function __construct() {
@@ -123,9 +122,9 @@ Class UM_Admin_Email_Profile_Update {
 
         if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'update' ) {
 
-            if ( is_admin() && ! $this->ready ) {
+            if ( is_admin()) {
 
-                $this->ready = true;
+                remove_action( 'profile_update', array( $this, 'custom_profile_is_updated_email_backend' ), 999, 3 );
                 $this->backend_form_id = sanitize_text_field( UM()->options()->get( 'profile_is_updated_email_backend_form' ));
 
                 if ( ! empty( $this->backend_form_id )) {
@@ -143,12 +142,16 @@ Class UM_Admin_Email_Profile_Update {
             return;
         }
 
-        if ( isset( $args['form_id'] )) { 
+        if ( isset( $args['form_id'] )) {
             $forms = array_map( 'sanitize_text_field', UM()->options()->get( 'profile_is_updated_email_custom_forms' ));
             if ( ! empty( $forms ) && is_array( $forms ) && ! in_array( $args['form_id'], $forms )) return;
         }
 
         $submitted = um_user( 'submitted' );
+        if ( empty( $submitted )) {
+            $submitted = array();
+            $submitted['form_id'] = '';
+        }
         foreach( $to_update as $key => $value ) {
             $submitted[$key] = $value;
         }
@@ -178,7 +181,9 @@ Class UM_Admin_Email_Profile_Update {
 
         UM()->mail()->send( get_bloginfo( 'admin_email' ), 'profile_is_updated_email', $args );
 
-        $submitted['form_id'] = $registration_form_id;
+        if ( ! empty( $registration_form_id )) {
+            $submitted['form_id'] = $registration_form_id;
+        }
 
         update_user_meta( $user_id, 'submitted', $submitted );
         update_user_meta( $user_id, 'timestamp', $registration_timestamp );
