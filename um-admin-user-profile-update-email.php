@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Admin Email Profile Update
  * Description:     Extension to Ultimate Member with an email template for sending an email to the site admin when an UM User Profile is updated either by the User or an Admin.
- * Version:         4.2.0
+ * Version:         4.3.0
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v2 or later
@@ -10,7 +10,7 @@
  * Author URI:      https://github.com/MissVeronica
  * Text Domain:     ultimate-member
  * Domain Path:     /languages
- * UM version:      2.7.0
+ * UM version:      2.8.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; 
@@ -145,6 +145,7 @@ Class UM_Admin_Email_Profile_Update {
         if ( isset( $args['form_id'] )) {
             $forms = array_map( 'sanitize_text_field', UM()->options()->get( 'profile_is_updated_email_custom_forms' ));
             if ( ! empty( $forms ) && is_array( $forms ) && ! in_array( $args['form_id'], $forms )) return;
+            $saved_form_id = $args['form_id'];
         }
 
         $submitted = um_user( 'submitted' );
@@ -160,6 +161,9 @@ Class UM_Admin_Email_Profile_Update {
         $registration_timestamp = um_user( 'timestamp' );
 
         $submitted['form_id'] = ( isset( $args['form_id'] )) ? $args['form_id'] : $this->backend_form_id;
+        if ( empty( $submitted['form_id'] )) {
+            $submitted['form_id'] = $saved_form_id;
+        }
 
         update_user_meta( $user_id, 'submitted', $submitted );
         update_user_meta( $user_id, 'timestamp', current_time( 'timestamp' ) );
