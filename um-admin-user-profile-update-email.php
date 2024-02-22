@@ -65,7 +65,7 @@ Class UM_Admin_Email_Profile_Update {
                     'label'         => __( 'Admin Email Profile Update - Include these UM Profile Forms', 'ultimate-member' ),
                     'options'       => $this->get_form_ids_profile(),
                     'conditional'   => array( $email_key . '_on', '=', 1 ),
-                    'tooltip'       => __( 'Multiple selection of UM Profile Forms for admin email when profile is updated by the User, none selected send emails always.', 'ultimate-member' )
+                    'description'   => __( 'Multiple selection of UM Profile Forms for admin email when profile is updated by the User, none selected send emails always.', 'ultimate-member' )
                     );
 
             $section_fields[] = array(
@@ -74,7 +74,7 @@ Class UM_Admin_Email_Profile_Update {
                     'label'         => __( 'Admin Email Profile Update - Backend UM Profile "Form"', 'ultimate-member' ),
                     'options'       => $this->get_form_ids_profile(),
                     'conditional'   => array( $email_key . '_on', '=', 1 ),
-                    'tooltip'       => __( 'Select Profile "Form" for mapping of backend submitted WP fields. No selection disable backend emails.', 'ultimate-member' )
+                    'description'   => __( 'Select Profile "Form" for mapping of backend submitted WP fields. No selection disable backend emails.', 'ultimate-member' )
                     );
 
             $section_fields[] = array(
@@ -82,7 +82,7 @@ Class UM_Admin_Email_Profile_Update {
                     'type'          => 'checkbox',
                     'label'         => __( 'Admin Email Profile Update - Trace to debug.log', 'ultimate-member' ),
                     'conditional'   => array( $email_key . '_on', '=', 1 ),
-                    'tooltip'       => __( 'Click for trace of Form IDs to debug.log.', 'ultimate-member' )
+                    'description'   => __( 'Click for trace of Form IDs to debug.log.', 'ultimate-member' )
                     );
         }
 
