@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Admin Email Profile Update
  * Description:     Extension to Ultimate Member with an email template for sending an email to the site admin when an UM User Profile is updated either by the User or an Admin.
- * Version:         4.4.0
+ * Version:         4.5.0
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v2 or later
@@ -10,7 +10,7 @@
  * Author URI:      https://github.com/MissVeronica
  * Text Domain:     ultimate-member
  * Domain Path:     /languages
- * UM version:      2.8.0
+ * UM version:      2.8.3
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; 
@@ -28,40 +28,30 @@ Class UM_Admin_Email_Profile_Update {
         add_action( 'um_user_after_updating_profile',         array( $this, 'custom_profile_is_updated_email' ), 999, 3 );
         add_action( 'profile_update',                         array( $this, 'custom_profile_is_updated_email_backend' ), 999, 3 );
         add_filter( 'um_admin_settings_email_section_fields', array( $this, 'um_admin_settings_email_section_fields_custom_forms' ), 10, 2 );
+        add_action(	'um_extend_admin_menu',                   array( $this, 'copy_email_notifications_admin_profile_update' ), 10 );
 
         define( 'Admin_Email_Profile_Update_Path', plugin_dir_path( __FILE__ ) );
     }
 
-    public function custom_email_notifications_profile_is_updated( $emails ) {
+    public function custom_email_notifications_profile_is_updated( $um_emails ) {
 
-        $custom_emails = array(
-                    'profile_is_updated_email' => array(
-                            'key'            => 'profile_is_updated_email',
-                            'title'          => __( 'Profile is updated email', 'ultimate-member' ),
-                            'subject'        => 'Profile Update {username}',
-                            'body'           => '',
-                            'description'    => __( 'To send an email to the site admin when a user profile is updated', 'ultimate-member' ),
-                            'recipient'      => 'admin',
-                            'default_active' => true ));
+        $um_emails['profile_is_updated_email'] = array(
+                                                'key'            => 'profile_is_updated_email',
+                                                'title'          => __( 'Profile is updated email', 'ultimate-member' ),
+                                                'subject'        => 'Profile Update {username}',
+                                                'body'           => '',
+                                                'description'    => __( 'To send an email to the site admin when a user profile is updated', 'ultimate-member' ),
+                                                'recipient'      => 'admin',
+                                                'default_active' => true 
+                                            );
 
-        UM()->options()->options = array_merge( array(  'profile_is_updated_email_on'  => 1,
-                                                        'profile_is_updated_email_sub' => 'Profile Update {username}', ),
-                                                UM()->options()->options );
+        if ( ! array_key_exists( 'profile_is_updated_email_on', UM()->options()->options ) ) {
 
-        foreach ( $custom_emails as $slug => $custom_email ) {
-
-            if ( ! array_key_exists( $slug . '_on', UM()->options()->options ) ) {
-
-                UM()->options()->options[ $slug . '_on' ]  = empty( $custom_email['default_active'] ) ? 0 : 1;
-                UM()->options()->options[ $slug . '_sub' ] = $custom_email['subject'];
-            }
-
-            $this->slug[] = $slug;
+            UM()->options()->options['profile_is_updated_email_on']  = empty( $um_emails['profile_is_updated_email']['default_active'] ) ? 0 : 1;
+            UM()->options()->options['profile_is_updated_email_sub'] = $um_emails['profile_is_updated_email']['subject'];
         }
 
-        $this->copy_email_notifications_admin_profile_update();
-
-        return array_merge( $custom_emails, $emails );
+        return $um_emails;
     }
 
     public function um_admin_settings_email_section_fields_custom_forms( $section_fields, $email_key ) {
@@ -101,27 +91,23 @@ Class UM_Admin_Email_Profile_Update {
 
     public function copy_email_notifications_admin_profile_update() {
 
-        foreach( $this->slug as $slug ) {
+        $slug = 'profile_is_updated_email';
 
-            if ( defined( 'STYLESHEETPATH' )) {
-                $located = UM()->mail()->locate_template( $slug );
-            }
+        $located = UM()->mail()->locate_template( $slug );
+        if ( ! is_file( $located ) || filesize( $located ) == 0 ) {
+            $located = wp_normalize_path( STYLESHEETPATH . '/ultimate-member/email/' . $slug . '.php' );
+        }
 
-            if ( ! isset( $located ) || ! is_file( $located ) || filesize( $located ) == 0 ) {
-                $located = wp_normalize_path( get_stylesheet_directory() . '/ultimate-member/email/' . $slug . '.php' );
-            }
+        clearstatcache();
+        if ( ! file_exists( $located ) || filesize( $located ) == 0 ) {
 
-            clearstatcache();
-            if ( ! file_exists( $located ) || filesize( $located ) == 0 ) {
+            wp_mkdir_p( dirname( $located ) );
 
-                wp_mkdir_p( dirname( $located ) );
+            $email_source = file_get_contents( Admin_Email_Profile_Update_Path . $slug . '.php' );
+            file_put_contents( $located, $email_source );
 
-                $email_source = file_get_contents( Admin_Email_Profile_Update_Path . $slug . '.php' );
-                file_put_contents( $located, $email_source );
-
-                if ( ! file_exists( $located ) ) {
-                    file_put_contents( um_path . 'templates/email/' . $slug . '.php', $email_source );
-                }
+            if ( ! file_exists( $located ) ) {
+                file_put_contents( um_path . 'templates/email/' . $slug . '.php', $email_source );
             }
         }
     }
@@ -146,10 +132,10 @@ Class UM_Admin_Email_Profile_Update {
 
         global $current_user;
 
-        if ( ! empty( $user_id )) {
+        if ( ! empty( $user_id ) && is_numeric( $user_id )) {
 
             $forms = false;
-            if ( isset( $args['form_id'] ) && ! empty( $args['form_id'] )) {
+            if ( isset( $args['form_id'] ) && ! empty( $args['form_id'] ) && is_numeric( $args['form_id'] )) {
 
                 $forms = UM()->options()->get( 'profile_is_updated_email_custom_forms' );
 
@@ -178,7 +164,7 @@ Class UM_Admin_Email_Profile_Update {
                 $submitted['form_id'] = ( empty( $this->backend_form_id )) ? $args['form_id'] : $this->backend_form_id;
                 $submitted['form_id'] = ( empty( $submitted['form_id'] ))  ? $registration_form_id : $submitted['form_id'];
 
-                if ( ! empty( $submitted['form_id'] )) {
+                if ( ! empty( $submitted['form_id'] ) && is_numeric( $submitted['form_id'] )) {
 
                     update_user_meta( $user_id, 'submitted', $submitted );
                     update_user_meta( $user_id, 'timestamp', current_time( 'timestamp' ) );
@@ -219,6 +205,7 @@ Class UM_Admin_Email_Profile_Update {
                         $trace .= ' backend: ' . $this->backend_form_id;
                         $trace .= ' registration: ' . $registration_form_id;
                         $trace .= ' submitted: ' . $submitted['form_id'];
+
                         if ( is_array( $forms )) {
                             $trace .= ' custom: ' . implode( ', ', $forms );
                         } else {
