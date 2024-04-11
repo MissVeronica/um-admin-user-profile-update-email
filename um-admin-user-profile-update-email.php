@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Admin Email Profile Update
  * Description:     Extension to Ultimate Member with an email template for sending an email to the site admin when an UM User Profile is updated either by the User or an Admin.
- * Version:         4.5.0
+ * Version:         4.6.0
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v2 or later
@@ -10,7 +10,7 @@
  * Author URI:      https://github.com/MissVeronica
  * Text Domain:     ultimate-member
  * Domain Path:     /languages
- * UM version:      2.8.3
+ * UM version:      2.8.5
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; 
@@ -45,10 +45,15 @@ Class UM_Admin_Email_Profile_Update {
                                                 'default_active' => true 
                                             );
 
-        if ( ! array_key_exists( 'profile_is_updated_email_on', UM()->options()->options ) ) {
+        if ( UM()->options()->get( 'profile_is_updated_email_on' ) === '' ) {
+        //if ( ! array_key_exists( 'profile_is_updated_email_on', UM()->options()->options ) ) {
 
-            UM()->options()->options['profile_is_updated_email_on']  = empty( $um_emails['profile_is_updated_email']['default_active'] ) ? 0 : 1;
-            UM()->options()->options['profile_is_updated_email_sub'] = $um_emails['profile_is_updated_email']['subject'];
+			$email_on = empty( $um_emails['profile_is_updated_email']['default_active'] ) ? 0 : 1;
+			UM()->options()->update( 'profile_is_updated_email_on', $email_on );
+            UM()->options()->update( 'profile_is_updated_email_sub', $um_emails['profile_is_updated_email']['subject'] );
+
+            //UM()->options()->options['profile_is_updated_email_on']  = empty( $um_emails['profile_is_updated_email']['default_active'] ) ? 0 : 1;
+            //UM()->options()->options['profile_is_updated_email_sub'] = $um_emails['profile_is_updated_email']['subject'];
         }
 
         return $um_emails;
