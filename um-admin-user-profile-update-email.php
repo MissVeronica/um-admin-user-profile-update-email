@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Ultimate Member - Admin Email Profile Update
  * Description:     Extension to Ultimate Member with an email template for sending an email to the site admin when an UM User Profile is updated either by the User or an Admin.
- * Version:         4.6.0
+ * Version:         4.7.0
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v2 or later
@@ -21,6 +21,7 @@ Class UM_Admin_Email_Profile_Update {
 
     public $slug            = array();
     public $backend_form_id = '';
+    public $profile_email   = false;
 
     function __construct() {
 
@@ -29,6 +30,7 @@ Class UM_Admin_Email_Profile_Update {
         add_action( 'profile_update',                         array( $this, 'custom_profile_is_updated_email_backend' ), 999, 3 );
         add_filter( 'um_admin_settings_email_section_fields', array( $this, 'um_admin_settings_email_section_fields_custom_forms' ), 10, 2 );
         add_action(	'um_extend_admin_menu',                   array( $this, 'copy_email_notifications_admin_profile_update' ), 10 );
+        add_filter( 'wp_mail',                                array( $this, 'add_email_profile_cc_wp_mail' ), 10, 1 );
 
         define( 'Admin_Email_Profile_Update_Path', plugin_dir_path( __FILE__ ) );
     }
@@ -59,6 +61,22 @@ Class UM_Admin_Email_Profile_Update {
         return $um_emails;
     }
 
+    public function add_email_profile_cc_wp_mail( $args ) {
+
+        if ( ! empty( $this->profile_email )) {
+
+            if ( is_array( $args['headers'] )) {
+                $args['headers'][] = 'cc: ' . $this->profile_email;
+
+            } else {
+
+                $args['headers'] .= 'cc: ' . $this->profile_email . "\r\n";
+            }
+        }
+
+        return $args ;
+    }
+
     public function um_admin_settings_email_section_fields_custom_forms( $section_fields, $email_key ) {
 
         if ( $email_key == 'profile_is_updated_email' ) {
@@ -80,6 +98,14 @@ Class UM_Admin_Email_Profile_Update {
                     'options'       => $this->get_form_ids_profile(),
                     'conditional'   => array( $email_key . '_on', '=', 1 ),
                     'description'   => __( 'Select Profile "Form" for mapping of backend submitted WP fields. No selection disable backend emails.', 'ultimate-member' )
+                    );
+
+            $section_fields[] = array(
+                    'id'            => $email_key . '_profile_cc',
+                    'type'          => 'checkbox',
+                    'label'         => __( 'Admin Email Profile Update - CC: email to User', 'ultimate-member' ),
+                    'conditional'   => array( $email_key . '_on', '=', 1 ),
+                    'description'   => __( 'Click for a CC: email to the profile owner address.', 'ultimate-member' )
                     );
 
             $section_fields[] = array(
@@ -178,6 +204,10 @@ Class UM_Admin_Email_Profile_Update {
                     um_fetch_user( $user_id );
 
                     $time_format = get_option( 'date_format', 'F j, Y' ) . ' ' . get_option( 'time_format', 'g:i a' );
+
+                    if ( UM()->options()->get( 'profile_is_updated_email_profile_cc' ) == 1 ) {
+                        $this->profile_email = um_user( 'user_email' );
+                    }
 
                     $args['tags'] = array(  '{profile_url}',
                                             '{current_date}',
