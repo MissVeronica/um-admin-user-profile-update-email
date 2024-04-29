@@ -111,7 +111,7 @@ Class UM_Admin_Email_Profile_Update {
             $section_fields[] = array(
                     'id'            => $email_key . '_admin_email',
                     'type'          => 'select',
-                    'label'         => __( 'Admin Email Profile Update - Admin Userr email', 'ultimate-member' ),
+                    'label'         => __( 'Admin Email Profile Update - Admin User email', 'ultimate-member' ),
                     'options'       => array(   'wp_admin_email' => 'WP: ' . get_bloginfo( 'admin_email' ),
                                                 'um_admin_email' => 'UM: ' . um_admin_email(),
                                             ),
