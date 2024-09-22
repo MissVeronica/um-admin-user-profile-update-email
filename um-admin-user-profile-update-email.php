@@ -2,15 +2,17 @@
 /**
  * Plugin Name:     Ultimate Member - Admin Email Profile Update
  * Description:     Extension to Ultimate Member with an email template for sending an email to the site admin when an UM User Profile is updated either by the User or an Admin.
- * Version:         4.7.2
+ * Version:         4.7.3
  * Requires PHP:    7.4
  * Author:          Miss Veronica
  * License:         GPL v2 or later
  * License URI:     https://www.gnu.org/licenses/gpl-2.0.html
  * Author URI:      https://github.com/MissVeronica
+ * Plugin URI:      https://github.com/MissVeronica/um-admin-user-profile-update-email
+ * Update URI:      https://github.com/MissVeronica/um-admin-user-profile-update-email
  * Text Domain:     ultimate-member
  * Domain Path:     /languages
- * UM version:      2.8.5
+ * UM version:      2.8.6
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; 
@@ -33,6 +35,17 @@ Class UM_Admin_Email_Profile_Update {
         add_filter( 'wp_mail',                                array( $this, 'add_email_profile_cc_wp_mail' ), 10, 1 );
 
         define( 'Admin_Email_Profile_Update_Path', plugin_dir_path( __FILE__ ) );
+        define( 'Plugin_Basename_PUE', plugin_basename(__FILE__));
+
+        add_filter( 'plugin_action_links_' . Plugin_Basename_PUE, array( $this, 'profile_is_updated_email_settings_link' ), 10, 1 );
+    }
+
+    public function profile_is_updated_email_settings_link( $links ) {
+
+        $url = get_admin_url() . 'admin.php?page=um_options&tab=email&email=profile_is_updated_email';
+        $links[] = '<a href="' . esc_url( $url ) . '">' . __( 'Settings' ) . '</a>';
+
+        return $links;
     }
 
     public function custom_email_notifications_profile_is_updated( $um_emails ) {
@@ -189,7 +202,7 @@ Class UM_Admin_Email_Profile_Update {
             if ( empty( $forms ) || ( is_array( $forms ) && in_array( $args['form_id'], $forms ))) {
 
                 um_fetch_user( $user_id );
-                $submitted = um_user( 'submitted' );
+                $submitted = maybe_unserialize( um_user( 'submitted' ));
 
                 if ( empty( $submitted )) {
                     $submitted = array();
