@@ -26,6 +26,7 @@ Profile fields updated via the UM Account page's existing or optional tabs are n
 12. Version 4.7.0 Addition of option for CC: email to User.
 13. Version 4.7.1 Select UM or WP Admin User email address.
 14. Version 4.7.2 Code improvement
+15. Version 4.7.3 Code improvements incl GitHub links and Plugin settings link
 
 ## Installation
 1. Install by downloading the plugin ZIP file and install as a new Plugin, which you upload in WordPress -> Plugins -> Add New -> Upload Plugin.
