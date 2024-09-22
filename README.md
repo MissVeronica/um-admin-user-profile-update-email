@@ -29,7 +29,7 @@ Profile fields updated via the UM Account page's existing or optional tabs are n
 15. Version 4.7.3 Code improvements incl GitHub links and Plugin settings link
 
 ## Installation
-1. Install by downloading the plugin ZIP file and install as a new Plugin, which you upload in WordPress -> Plugins -> Add New -> Upload Plugin.
+1. Install by downloading the plugin ZIP file ( Green button ) and install as a new Plugin, which you upload in WordPress -> Plugins -> Add New -> Upload Plugin.
 2. Activate the Plugin: Ultimate Member - Admin Email Profile Update
 3. Email Template autoinstalls when you go to UM Settings Email
 
